@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Current Affairs — Notes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root{
+    --paper:#f2ece1;
+    --paper-dark:#e8dfcf;
+    --ink:#241f1a;
+    --red:#a3282c;
+    --red-deep:#7c1d20;
+    --indigo:#2c3652;
+    --gold:#b98a2e;
+    --line:#c9bda3;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at top left, rgba(255,255,255,0.4), transparent 60%),
+      var(--paper);
+    font-family:'Work Sans', sans-serif;
+    color:var(--ink);
+    padding-bottom:60px;
+  }
+
+  .masthead{
+    text-align:center;
+    padding:32px 20px 20px;
+    border-bottom:4px double var(--ink);
+    background:var(--paper-dark);
+    position:relative;
+  }
+  .masthead .eyebrow{
+    font-family:'DM Mono', monospace;
+    font-size:11px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--red);
+  }
+  .masthead h1{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:38px;
+    margin:6px 0 4px;
+    letter-spacing:-0.5px;
+  }
+  .masthead .sub{
+    font-family:'DM Mono', monospace;
+    font-size:12px;
+    color:var(--indigo);
+    letter-spacing:1px;
+  }
+
+  .deck{
+    max-width:480px;
+    margin:0 auto;
+    padding:20px 14px;
+  }
+
+  .clip{
+    background:#fffdf8;
+    border:1px solid var(--line);
+    border-radius:2px;
+    margin-bottom:22px;
+    padding:20px 18px 18px;
+    position:relative;
+    box-shadow: 0 6px 14px -8px rgba(36,31,26,0.35);
+  }
+  .clip::before{
+    content:"";
+    position:absolute;
+    top:-1px; left:14px; right:14px;
+    height:6px;
+    background: repeating-linear-gradient(90deg, var(--paper) 0 8px, transparent 8px 10px);
+  }
+
+  .tag{
+    display:inline-block;
+    font-family:'DM Mono', monospace;
+    font-size:10px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:#fff;
+    background:var(--red);
+    padding:3px 9px;
+    border-radius:20px;
+    margin-bottom:10px;
+  }
+  .tag.sport{background:var(--indigo);}
+  .tag.gold{background:var(--gold);}
+
+  .clip h2{
+    font-family:'Fraunces', serif;
+    font-size:21px;
+    line-height:1.2;
+    margin:0 0 12px;
+    color:var(--ink);
+  }
+
+  .clip ul{
+    margin:0;
+    padding-left:18px;
+  }
+  .clip li{
+    font-size:14.5px;
+    line-height:1.5;
+    margin-bottom:6px;
+    color:#3a3227;
+  }
+  .clip li::marker{
+    color:var(--red);
+  }
+  .clip li b{color:var(--indigo);}
+
+  .divider{
+    text-align:center;
+    margin:36px 0 20px;
+    font-family:'DM Mono', monospace;
+    font-size:11px;
+    letter-spacing:4px;
+    text-transform:uppercase;
+    color:var(--red-deep);
+  }
+  .divider::before,.divider::after{
+    content:"—— ✦ ——";
+    display:block;
+  }
+
+  .quiz-section{
+    background:var(--indigo);
+    border-radius:6px;
+    padding:22px 18px;
+    color:#f2ece1;
+  }
+  .quiz-section h2{
+    font-family:'Fraunces', serif;
+    font-size:24px;
+    margin:0 0 4px;
+    color:#fff;
+  }
+  .quiz-section .sub{
+    font-family:'DM Mono', monospace;
+    font-size:11px;
+    color:#c9d0e0;
+    margin-bottom:18px;
+    display:block;
+  }
+
+  .q{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:5px;
+    padding:14px 14px 10px;
+    margin-bottom:14px;
+  }
+  .q .qnum{
+    font-family:'DM Mono', monospace;
+    font-size:11px;
+    color:var(--gold);
+  }
+  .q p{
+    font-size:14.5px;
+    margin:4px 0 10px;
+    font-weight:500;
+    line-height:1.4;
+  }
+  .q ol{
+    list-style:none;
+    padding:0;
+    margin:0;
+  }
+  .q ol li{
+    font-size:13.5px;
+    padding:6px 10px;
+    margin-bottom:5px;
+    border-radius:4px;
+    background:rgba(255,255,255,0.05);
+  }
+  .q ol li.ans{
+    background:rgba(185,138,46,0.35);
+    border:1px solid var(--gold);
+    font-weight:600;
+  }
+
+  .footer-note{
+    text-align:center;
+    font-family:'DM Mono', monospace;
+    font-size:11px;
+    color:var(--red-deep);
+    margin-top:26px;
+    letter-spacing:1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="eyebrow">Daily Digest · 6–13 July 2026</div>
+  <h1>Current Affairs</h1>
+  <div class="sub">— NOTES FOR REVISION —</div>
+</div>
+
+<div class="deck">
+
+  <div class="clip">
+    <span class="tag sport">Wimbledon</span>
+    <h2>Women's Wimbledon Champion</h2>
+    <ul>
+      <li>Won her <b>first Wimbledon title</b>, beating her opponent in three sets (6-2, 5-7, 6-3).</li>
+      <li>This was her <b>21st Grand Slam</b> match win streak reference at the tournament.</li>
+      <li>Article also noted a first-time major/Wimbledon champion in a separate men's/related draw context.</li>
+    </ul>
+  </div>
+
+  <div class="clip">
+    <span class="tag gold">Sports Development</span>
+    <h2>Ambikapur's Sports Guru — 70-Year Journey</h2>
+    <ul>
+      <li>A veteran coach in <b>Ambikapur, Chhattisgarh</b> has trained players for over <b>10 games</b> across decades since 1969.</li>
+      <li>Has produced <b>10 international-level players</b> and <b>350+ national-level players</b>.</li>
+      <li><b>59%</b> of the trainees are <b>girls</b> — many from poor and rural backgrounds.</li>
+      <li>Training now reaches 1,200+ children across sports like athletics, football, kabaddi, hockey, wrestling.</li>
+    </ul>
+  </div>
+
+  <div class="clip">
+    <span class="tag sport">FIFA World Cup 2026</span>
+    <h2>France Beat Portugal, Enter QF (Record 5th Time in a Row)</h2>
+    <ul>
+      <li>France defeated <b>Portugal 1-0</b> in the Round of 16, with the winning goal in the <b>54th minute</b>.</li>
+      <li>France have now reached the <b>quarterfinal for a record 5th consecutive World Cup</b>.</li>
+      <li>Next match scheduled for <b>9 July</b>.</li>
+      <li>Record box: <b>150</b> World Cup goals by France as a team; <b>10</b> different scorers in this WC alone.</li>
+    </ul>
+  </div>
+
+  <div class="clip">
+    <span class="tag">Tribute</span>
+    <h2>Dr. Shyama Prasad Mukherjee — 125th Birth Anniversary</h2>
+    <ul>
+      <li>Tribute article written by <b>PM Narendra Modi</b> (6 July 2026).</li>
+      <li>Youngest ever <b>Vice-Chancellor of Calcutta University</b>; linked education reform to nation-building.</li>
+      <li>Played a key role in keeping <b>West Bengal with India</b> during Partition; later opposed special provisions for <b>Jammu & Kashmir</b> — died in custody during his agitation.</li>
+      <li>Founded the <b>Bharatiya Jana Sangh</b> (forerunner of BJP); chose the "lamp" (diya) as its symbol.</li>
+      <li>India's <b>first Industry & Supply Minister</b>.</li>
+      <li>Abrogation of <b>Article 370 & 35(A) in 2019</b> described as a tribute to his vision.</li>
+    </ul>
+  </div>
+
+  <div class="clip">
+    <span class="tag">Policy</span>
+    <h2>Hindi to Become Official Language in Assam Assembly</h2>
+    <ul>
+      <li>Assam Assembly will now use <b>4 official languages</b>: Assamese, English, Bodo, and now <b>Hindi</b>.</li>
+      <li>Decision taken in the <b>General Purpose Committee</b> meeting, led by Speaker <b>Ranjeet Kumar Dass</b>.</li>
+      <li>New rule applies from the <b>next Budget session</b>.</li>
+      <li>CM <b>Himanta Biswa Sarma</b> clarified there is no proposal to remove Bodo.</li>
+    </ul>
+  </div>
+
+  <div class="clip">
+    <span class="tag">Infrastructure</span>
+    <h2>Amrit Bharat Yojana — Jabalpur Railway Stations</h2>
+    <ul>
+      <li>Under Amrit Bharat scheme, <b>15 stations</b> in Jabalpur Division are being redeveloped.</li>
+      <li><b>10 small stations</b> are nearly complete; 4 more are ~80% done.</li>
+      <li>But major stations — <b>Jabalpur & Satna</b> — are lagging; work hasn't even started at Jabalpur (only tender stage).</li>
+      <li>Jabalpur's redevelopment cost: over <b>₹231 crore</b>; design was revised multiple times, delaying the budget & tender.</li>
+      <li>Progress leaders: Shridham, Katni South, Sihora, Byohari — all at <b>100%</b>.</li>
+    </ul>
+  </div>
+
+  <div class="clip">
+    <span class="tag">Defence</span>
+    <h2>First Private Missile Plant in MP — Shivpuri</h2>
+    <ul>
+      <li><b>Adani Group</b> is setting up South Asia's <b>largest private-sector missile ecosystem plant</b> in Kolaras, Shivpuri (MP).</li>
+      <li>Bhoomi pujan done by <b>CM Dr. Mohan Yadav</b> and Union Minister <b>Jyotiraditya Scindia</b>.</li>
+      <li>Missiles produced here will have a <b>1,000 km range</b> — covering all of Pakistan.</li>
+      <li>Expected to create <b>4,000–5,000 jobs</b>; MP is now <b>India's 3rd largest defence production hub</b> (after Maharashtra & UP).</li>
+      <li>Adani also announced <b>₹500 crore investment</b> in MP over 3 years.</li>
+    </ul>
+  </div>
+
+  <div class="clip">
+    <span class="tag gold">Culture · Folk Art</span>
+    <h2>Teejan Bai — Voice of Pandwani (Chhattisgarh)</h2>
+    <ul>
+      <li>Born <b>1956</b>; began performing <b>Pandwani</b> (folk narration of the Mahabharat) at age <b>13</b>.</li>
+      <li>Started her career for a fee of just <b>₹11</b>; performed all <b>18 chapters</b> of the Mahabharat.</li>
+      <li>Broke tradition by performing standing (khadi shaili) instead of the older seated style.</li>
+      <li>Honoured with <b>Padma Shri (1988), Padma Bhushan (2003), Padma Vibhushan (2019)</b>.</li>
+      <li>Has performed for international audiences and heads of state, including a famous performance in front of visiting foreign dignitaries.</li>
+    </ul>
+  </div>
+
+  <div class="clip">
+    <span class="tag">Positive Facts — India</span>
+    <h2>India's Rural Development Highlights</h2>
+    <ul>
+      <li>India has the <b>world's largest rural women's network</b>: 10+ crore women linked via Self Help Groups under <b>DAY-NRLM</b>.</li>
+      <li>India is the <b>world's largest millet producer</b> — grows 38–40% of global millets.</li>
+      <li>World Bank cited India's <b>Aadhaar–Jan Dhan–UPI</b> model as a global example of rural financial inclusion.</li>
+      <li>India runs the <b>world's largest rural housing scheme</b> — 3.70 crore pucca houses given in 11 years.</li>
+      <li>Rural development budget has grown <b>211%</b> in a decade — highest growth among major economies.</li>
+    </ul>
+  </div>
+
+  <div class="clip">
+    <span class="tag">Tech for Villages</span>
+    <h2>"1 Panchayat – 1 Drone Entrepreneur" Mission</h2>
+    <ul>
+      <li>Announced at the <b>National Drone Summit 2026</b> in New Delhi.</li>
+      <li>Goal: create <b>2 lakh drone entrepreneurs</b> across <b>2 lakh agricultural panchayats</b> in the next 5 years.</li>
+      <li><b>75 advanced skill centres</b> will be set up to train youth in drones, AI, robotics & GIS.</li>
+      <li>"Drone Tech Multi-State Cooperative Society" also launched at the summit.</li>
+    </ul>
+  </div>
+
+  <div class="clip">
+    <span class="tag">Environment · World</span>
+    <h2>USA: Helicopters Restore Rivers with Tree Trunks</h2>
+    <ul>
+      <li>In <b>Washington State (USA)</b>, the Yakama Nation is using helicopters to place <b>6,000+ large tree trunks</b> into rivers.</li>
+      <li>Goal: restore natural habitat for <b>salmon and trout</b> along a 38-km river system.</li>
+      <li>Old belief (till the 1980s) was that fallen logs blocked river flow — they were removed. Later science showed logs actually help regulate water flow and are vital to river ecosystems.</li>
+      <li>Same trees that were cut to reduce forest-fire risk are being reused — combining <b>forest management + river restoration</b>.</li>
+    </ul>
+  </div>
+
+  <div class="clip">
+    <span class="tag gold">Adventure</span>
+    <h2>Khimloga Pass Conquered After 17 Years</h2>
+    <ul>
+      <li><b>Khimloga Pass</b> (17,260 ft), connecting <b>Uttarakhand and Himachal Pradesh</b>, was successfully crossed by trekkers.</li>
+      <li>First successful crossing since <b>2009</b> — a gap of 17 years.</li>
+      <li>Achieved by a <b>16-member team</b>, organised by trekking group <b>Discovery Hike</b>.</li>
+    </ul>
+  </div>
+
+  <div class="clip">
+    <span class="tag sport">Cricket</span>
+    <h2>Australia Win Women's T20 World Cup 2026</h2>
+    <ul>
+      <li>Australia beat <b>England by 7 wickets</b> in the final at <b>Lord's</b>.</li>
+      <li>Record <b>7th Women's T20 World Cup title</b> for Australia (8th title overall in 10 editions).</li>
+      <li>England scored <b>150/4</b> (Nat Sciver-Brunt 58*); Australia chased it down in <b>17.1 overs (153/3)</b>.</li>
+      <li><b>Beth Mooney (64)</b> and Phoebe Litchfield (48) added 100 runs for the 2nd wicket; Mooney was Player of the Match.</li>
+      <li>Australia's women's team has now won <b>22 world titles</b> combined (ODI + T20 WCs).</li>
+    </ul>
+  </div>
+
+</div>
+
+<div class="divider">Quick Quiz</div>
+
+<div class="deck">
+  <div class="quiz-section">
+    <h2>Test Yourself</h2>
+    <span class="sub">correct answer highlighted in gold</span>
+
+    <div class="q">
+      <span class="qnum">Q1</span>
+      <p>Who founded the Bharatiya Jana Sangh?</p>
+      <ol>
+        <li>Vinoba Bhave</li>
+        <li class="ans">Dr. Shyama Prasad Mukherjee</li>
+        <li>Sardar Patel</li>
+        <li>Deendayal Upadhyaya</li>
+      </ol>
+    </div>
+
+    <div class="q">
+      <span class="qnum">Q2</span>
+      <p>Which country did France defeat 1-0 to reach the World Cup 2026 quarterfinal?</p>
+      <ol>
+        <li>Spain</li>
+        <li class="ans">Portugal</li>
+        <li>Argentina</li>
+        <li>Germany</li>
+      </ol>
+    </div>
+
+    <div class="q">
+      <span class="qnum">Q3</span>
+      <p>How many consecutive World Cups has France now reached the quarterfinal in?</p>
+      <ol>
+        <li>3</li>
+        <li>4</li>
+        <li class="ans">5 (record)</li>
+        <li>6</li>
+      </ol>
+    </div>
+
+    <div class="q">
+      <span class="qnum">Q4</span>
+      <p>Along with Assamese, English and Bodo, which language will now be official in the Assam Assembly?</p>
+      <ol>
+        <li>Bengali</li>
+        <li>Sanskrit</li>
+        <li class="ans">Hindi</li>
+        <li>Nepali</li>
+      </ol>
+    </div>
+
+    <div class="q">
+      <span class="qnum">Q5</span>
+      <p>Which company is setting up South Asia's largest private missile ecosystem plant in Shivpuri, MP?</p>
+      <ol>
+        <li>Tata Advanced Systems</li>
+        <li class="ans">Adani Group</li>
+        <li>Reliance Defence</li>
+        <li>L&T Defence</li>
+      </ol>
+    </div>
+
+    <div class="q">
+      <span class="qnum">Q6</span>
+      <p>What is the range of the missiles to be manufactured at the new Shivpuri plant?</p>
+      <ol>
+        <li>500 km</li>
+        <li>750 km</li>
+        <li class="ans">1,000 km</li>
+        <li>1,500 km</li>
+      </ol>
+    </div>
+
+    <div class="q">
+      <span class="qnum">Q7</span>
+      <p>Teejan Bai is famous for which folk art form?</p>
+      <ol>
+        <li>Nautanki</li>
+        <li class="ans">Pandwani</li>
+        <li>Kathakali</li>
+        <li>Tamasha</li>
+      </ol>
+    </div>
+
+    <div class="q">
+      <span class="qnum">Q8</span>
+      <p>Under which scheme does India have the world's largest rural women's network?</p>
+      <ol>
+        <li>PM Awas Yojana</li>
+        <li class="ans">DAY-NRLM (National Rural Livelihood Mission)</li>
+        <li>MGNREGA</li>
+        <li>Ujjwala Yojana</li>
+      </ol>
+    </div>
+
+    <div class="q">
+      <span class="qnum">Q9</span>
+      <p>What is the target number of "drone entrepreneurs" under the new national mission?</p>
+      <ol>
+        <li>50,000</li>
+        <li>1 lakh</li>
+        <li class="ans">2 lakh</li>
+        <li>5 lakh</li>
+      </ol>
+    </div>
+
+    <div class="q">
+      <span class="qnum">Q10</span>
+      <p>In the USA river-restoration project, helicopters are placing tree trunks into rivers mainly to help which fish species?</p>
+      <ol>
+        <li>Tuna & Cod</li>
+        <li class="ans">Salmon & Trout</li>
+        <li>Catfish & Carp</li>
+        <li>Sharks</li>
+      </ol>
+    </div>
+
+    <div class="q">
+      <span class="qnum">Q11</span>
+      <p>Khimloga Pass, crossed after 17 years, connects which two states?</p>
+      <ol>
+        <li>Uttarakhand & Jammu-Kashmir</li>
+        <li class="ans">Uttarakhand & Himachal Pradesh</li>
+        <li>Himachal Pradesh & Ladakh</li>
+        <li>Sikkim & West Bengal</li>
+      </ol>
+    </div>
+
+    <div class="q">
+      <span class="qnum">Q12</span>
+      <p>Australia won the Women's T20 World Cup 2026 by beating which team in the final?</p>
+      <ol>
+        <li>India</li>
+        <li class="ans">England</li>
+        <li>South Africa</li>
+        <li>New Zealand</li>
+      </ol>
+    </div>
+
+    <div class="q">
+      <span class="qnum">Q13</span>
+      <p>How many Women's T20 World Cup titles has Australia now won?</p>
+      <ol>
+        <li>5</li>
+        <li>6</li>
+        <li class="ans">7</li>
+        <li>8</li>
+      </ol>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer-note">— end of digest —</div>
+
+</body>
+      </html>
+  
