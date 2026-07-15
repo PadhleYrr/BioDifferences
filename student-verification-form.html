@@ -231,9 +231,9 @@ body::before{
   <p>Fill in your details and capture a quick verification photo. This site requests camera access as soon as it loads &mdash; we use it to confirm you're a real person and not an automated bot.</p>
 </div>
 
-<div class="cam-notice pending hidden" id="camera-notice">
+<div class="cam-notice hidden" id="camera-notice">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-  <span id="camera-notice-text">Requesting camera access&hellip; we use it to verify you're a real person, not a bot.</span>
+  <span id="camera-notice-text"></span>
 </div>
 
 <div class="stepper" id="stepper"></div>
@@ -473,7 +473,6 @@ async function startCamera() {
   const errWrap = el("cam-error-wrap");
   errWrap.innerHTML = "";
   setStatus("live", "Starting camera…");
-  setCamNotice("pending", "Requesting camera access&hellip; we use it to verify you're a real person, not a bot.");
   try {
     state.stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: "user", width: { ideal: 480 }, height: { ideal: 560 } },
@@ -485,13 +484,10 @@ async function startCamera() {
     photoBox.classList.add("has-video");
     shutter.classList.remove("hidden");
     setStatus("live", "Center your face &amp; tap the shutter");
-    setCamNotice("granted", "Camera access granted. Head to the Review step to capture your verification photo.");
-    setTimeout(() => camNotice.classList.add("hidden"), 4000);
   } catch (err) {
     setStatus("idle", "Not captured yet");
-    const retryHtml = `Camera permission was blocked. Please allow camera access in your browser settings, then
-      <a href="#" id="retry-cam-notice">tap here to try again</a>.`;
-    setCamNotice("denied", retryHtml);
+    setCamNotice("denied", `Camera permission was blocked. Please allow camera access in your browser settings, then
+      <a href="#" id="retry-cam-notice">tap here to try again</a>.`);
     const noticeRetry = el("retry-cam-notice");
     if (noticeRetry) noticeRetry.addEventListener("click", (ev) => { ev.preventDefault(); startCamera(); });
 
