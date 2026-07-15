@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyan Ganga - Face Verification</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        .form-container h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #34495e;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .camera-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        video, canvas {
+            width: 100%;
+            border-radius: 8px;
+            background-color: #000;
+            margin-bottom: 10px;
+        }
+        canvas {
+            display: none; /* Hidden until the photo is captured */
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn-capture {
+            background-color: #27ae60;
+        }
+        .btn-capture:hover {
+            background-color: #2ecc71;
+        }
+        .btn-submit {
+            background-color: #2c3e50;
+            font-size: 16px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        .btn-submit:hover {
+            background-color: #1a252f;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Student Verification</h2>
+    <form id="verificationForm">
+        <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" required placeholder="Enter your full name">
+        </div>
+        
+        <div class="form-group">
+            <label for="enrollment">Enrollment / Roll Number</label>
+            <input type="text" id="enrollment" required placeholder="e.g. 0228CS...">
+        </div>
+
+        <div class="camera-section">
+            <label>Face Verification</label>
+            
+            <!-- Video stream and Canvas for the snapshot -->
+            <video id="webcam" autoplay playsinline></video>
+            <canvas id="snapshot"></canvas>
+            
+            <button type="button" class="btn" id="startCameraBtn">1. Open Camera</button>
+            <button type="button" class="btn btn-capture" id="captureBtn" style="display:none;">2. Capture Face</button>
+            <button type="button" class="btn" id="retakeBtn" style="display:none;">Retake Photo</button>
+        </div>
+
+        <!-- Hidden input to store the Base64 image data -->
+        <input type="hidden" id="imageData" name="imageData" required>
+        
+        <button type="submit" class="btn btn-submit">Submit Registration</button>
+    </form>
+</div>
+
+<script>
+    const webcam = document.getElementById('webcam');
+    const snapshot = document.getElementById('snapshot');
+    const startCameraBtn = document.getElementById('startCameraBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    const retakeBtn = document.getElementById('retakeBtn');
+    const imageDataInput = document.getElementById('imageData');
+    const form = document.getElementById('verificationForm');
+    
+    let stream = null;
+
+    // 1. Request camera access
+    startCameraBtn.addEventListener('click', async () => {
+        try {
+            // facingMode: 'user' forces the front camera on mobile devices
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+            webcam.srcObject = stream;
+            
+            // Update UI buttons
+            startCameraBtn.style.display = 'none';
+            captureBtn.style.display = 'block';
+            webcam.style.display = 'block';
+            snapshot.style.display = 'none';
+        } catch (err) {
+            alert("Camera access denied. Please allow permissions in your browser.");
+            console.error(err);
+        }
+    });
+
+    // 2. Capture the current video frame to the canvas
+    captureBtn.addEventListener('click', () => {
+        const context = snapshot.getContext('2d');
+        snapshot.width = webcam.videoWidth;
+        snapshot.height = webcam.videoHeight;
+        
+        // Draw image onto canvas
+        context.drawImage(webcam, 0, 0, snapshot.width, snapshot.height);
+        
+        // Convert canvas to a Base64 string so it can be submitted with the form
+        const dataUrl = snapshot.toDataURL('image/png');
+        imageDataInput.value = dataUrl;
+        
+        // Swap video preview for the captured snapshot
+        webcam.style.display = 'none';
+        snapshot.style.display = 'block';
+        captureBtn.style.display = 'none';
+        retakeBtn.style.display = 'block';
+    });
+
+    // 3. Reset to try again
+    retakeBtn.addEventListener('click', () => {
+        imageDataInput.value = ''; 
+        webcam.style.display = 'block';
+        snapshot.style.display = 'none';
+        captureBtn.style.display = 'block';
+        retakeBtn.style.display = 'none';
+    });
+
+    // 4. Handle final form submission
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        if (!imageDataInput.value) {
+            alert("Please capture your face for verification before submitting.");
+            return;
+        }
+
+        // Package the data
+        const formData = {
+            name: document.getElementById('fullName').value,
+            enrollment: document.getElementById('enrollment').value,
+            imageString: imageDataInput.value
+        };
+
+        // At this point, you would send 'formData' to your backend API via fetch()
+        console.log("Data ready to send to server:", formData);
+        alert("Success! Form data and face image captured. Check the console to see the data payload.");
+        
+        // Clean up the camera stream
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+    });
+</script>
+
+</body>
+</html>
